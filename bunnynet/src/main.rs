@@ -73,6 +73,12 @@ pub enum Commands {
         #[command(subcommand)]
         action: cmd::dns_zone::DnsZoneAction,
     },
+    /// Manage pull zones
+    #[command(name = "pull-zone")]
+    PullZone {
+        #[command(subcommand)]
+        action: cmd::pull_zone::PullZoneAction,
+    },
     /// View CDN statistics
     Statistics {
         /// Start date for statistics range
@@ -150,6 +156,7 @@ fn run(cli: Cli) -> Result<()> {
         Commands::Billing { action } => cmd::billing::run(action, &client, mode),
         Commands::StorageZone { action } => cmd::storage_zone::run(action, &client, mode),
         Commands::DnsZone { action } => cmd::dns_zone::run(action, &client, mode),
+        Commands::PullZone { action } => cmd::pull_zone::run(action, &client, mode),
         Commands::Statistics {
             date_from,
             date_to,

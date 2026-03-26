@@ -13,6 +13,7 @@ categories = ["command-line-utilities"]
 [dependencies]
 bunnynet-lib = { path = "../bunnynet-lib" }
 anyhow = "1"
+base64 = "0.22"
 clap = { version = "4", features = ["derive"] }
 serde_json = "1"
 tabled = "0.17"
