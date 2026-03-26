@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use crate::output::{self, OutputMode};
 use bunnynet_lib::client::Client;
 use bunnynet_lib::models::pagination::PaginatedList;
-use bunnynet_lib::models::storage_zone::{StorageZone, StorageZoneRow};
+use bunnynet_lib::models::storage_zone::{StorageZone, StorageZoneRow, StorageZoneStatistics};
 
 #[derive(Subcommand)]
 pub enum StorageZoneAction {
@@ -71,6 +71,34 @@ pub enum StorageZoneAction {
         #[arg(long)]
         delete_linked_pull_zones: bool,
     },
+    /// Check if a storage zone name is available
+    CheckAvailability {
+        /// Name to check
+        name: String,
+    },
+    /// Reset storage zone password
+    ResetPassword {
+        /// Storage zone ID
+        id: i64,
+    },
+    /// Reset storage zone read-only password
+    #[command(name = "reset-read-only-password")]
+    ResetReadOnlyPassword {
+        /// Storage zone ID
+        #[arg(long)]
+        id: i64,
+    },
+    /// View storage zone statistics
+    Statistics {
+        /// Storage zone ID
+        id: i64,
+        /// Start date for statistics range
+        #[arg(long)]
+        date_from: Option<String>,
+        /// End date for statistics range
+        #[arg(long)]
+        date_to: Option<String>,
+    },
 }
 
 pub fn run(action: StorageZoneAction, client: &Client, mode: OutputMode) -> Result<()> {
@@ -116,6 +144,18 @@ pub fn run(action: StorageZoneAction, client: &Client, mode: OutputMode) -> Resu
             id,
             delete_linked_pull_zones,
         } => delete(client, mode, id, delete_linked_pull_zones),
+        StorageZoneAction::CheckAvailability { name } => {
+            check_availability(client, mode, &name)
+        }
+        StorageZoneAction::ResetPassword { id } => reset_password(client, mode, id),
+        StorageZoneAction::ResetReadOnlyPassword { id } => {
+            reset_read_only_password(client, mode, id)
+        }
+        StorageZoneAction::Statistics {
+            id,
+            date_from,
+            date_to,
+        } => statistics(client, mode, id, date_from, date_to),
     }
 }
 
@@ -332,6 +372,129 @@ fn delete(
         }
         OutputMode::Table => {
             output::print_confirm(&format!("Storage zone {} deleted", id));
+        }
+    }
+
+    Ok(())
+}
+
+fn check_availability(client: &Client, mode: OutputMode, name: &str) -> Result<()> {
+    let mut body: HashMap<String, serde_json::Value> = HashMap::new();
+    body.insert("Name".to_string(), serde_json::json!(name));
+
+    let _resp = client.post("/storagezone/checkavailability", &body)?;
+
+    match mode {
+        OutputMode::Json => {
+            let json = serde_json::json!({"available": true, "name": name});
+            output::print_json(&json);
+        }
+        OutputMode::Table => {
+            output::print_confirm(&format!("Storage zone name '{}' is available", name));
+        }
+    }
+
+    Ok(())
+}
+
+fn reset_password(client: &Client, mode: OutputMode, id: i64) -> Result<()> {
+    let path = format!("/storagezone/{}/resetPassword", id);
+    let _resp = client.post_no_body(&path)?;
+
+    match mode {
+        OutputMode::Json => {
+            let json = serde_json::json!({"status": "password_reset", "id": id});
+            output::print_json(&json);
+        }
+        OutputMode::Table => {
+            output::print_confirm(&format!("Password reset for storage zone {}", id));
+        }
+    }
+
+    Ok(())
+}
+
+fn reset_read_only_password(client: &Client, mode: OutputMode, id: i64) -> Result<()> {
+    let id_str = id.to_string();
+    let params: Vec<(&str, &str)> = vec![("id", &id_str)];
+    let _resp = client.post_with_params("/storagezone/resetReadOnlyPassword", &params)?;
+
+    match mode {
+        OutputMode::Json => {
+            let json = serde_json::json!({"status": "read_only_password_reset", "id": id});
+            output::print_json(&json);
+        }
+        OutputMode::Table => {
+            output::print_confirm(&format!(
+                "Read-only password reset for storage zone {}",
+                id
+            ));
+        }
+    }
+
+    Ok(())
+}
+
+fn statistics(
+    client: &Client,
+    mode: OutputMode,
+    id: i64,
+    date_from: Option<String>,
+    date_to: Option<String>,
+) -> Result<()> {
+    let path = format!("/storagezone/{}/statistics", id);
+    let mut params: Vec<(&str, String)> = Vec::new();
+    if let Some(ref df) = date_from {
+        params.push(("dateFrom", df.clone()));
+    }
+    if let Some(ref dt) = date_to {
+        params.push(("dateTo", dt.clone()));
+    }
+    let params_ref: Vec<(&str, &str)> = params.iter().map(|(k, v)| (*k, v.as_str())).collect();
+
+    let resp = if params_ref.is_empty() {
+        client.get(&path)?
+    } else {
+        client.get_with_params(&path, &params_ref)?
+    };
+
+    match mode {
+        OutputMode::Json => {
+            let json: serde_json::Value = resp.json()?;
+            output::print_json(&json);
+        }
+        OutputMode::Table => {
+            let stats: StorageZoneStatistics = resp.json()?;
+            let storage_entries = stats
+                .storage_used_chart
+                .as_ref()
+                .map(|m| m.len())
+                .unwrap_or(0);
+            let file_entries = stats
+                .file_count_chart
+                .as_ref()
+                .map(|m| m.len())
+                .unwrap_or(0);
+            let latest_storage = stats
+                .storage_used_chart
+                .as_ref()
+                .and_then(|m| m.values().max().copied())
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "-".to_string());
+            let latest_files = stats
+                .file_count_chart
+                .as_ref()
+                .and_then(|m| m.values().max().copied())
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "-".to_string());
+
+            output::print_kv(&[
+                ("Storage Zone ID", id.to_string()),
+                ("Storage Data Points", storage_entries.to_string()),
+                ("File Count Data Points", file_entries.to_string()),
+                ("Peak Storage Used", latest_storage),
+                ("Peak File Count", latest_files),
+            ]);
         }
     }
 
