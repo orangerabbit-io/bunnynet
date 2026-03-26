@@ -56,6 +56,11 @@ pub enum Commands {
         #[arg(long)]
         size: Option<i64>,
     },
+    /// Manage billing
+    Billing {
+        #[command(subcommand)]
+        action: cmd::billing::BillingAction,
+    },
     /// View CDN statistics
     Statistics {
         /// Start date for statistics range
@@ -130,6 +135,7 @@ fn run(cli: Cli) -> Result<()> {
         Commands::Search { query, from, size } => {
             cmd::search::run(&client, mode, &query, from, size)
         }
+        Commands::Billing { action } => cmd::billing::run(action, &client, mode),
         Commands::Statistics {
             date_from,
             date_to,
