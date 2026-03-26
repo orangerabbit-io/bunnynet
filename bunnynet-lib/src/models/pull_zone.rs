@@ -741,10 +741,7 @@ mod tests {
         assert_eq!(pz.enable_geo_zone_us, Some(true));
         assert_eq!(pz.enable_geo_zone_asia, Some(false));
         assert_eq!(pz.blocked_ips, Some(vec!["1.2.3.4".to_string()]));
-        assert_eq!(
-            pz.connection_limit_per_ip_count,
-            Some(0)
-        );
+        assert_eq!(pz.connection_limit_per_ip_count, Some(0));
         assert_eq!(pz.dns_record_id, Some(0));
         assert_eq!(pz.dns_zone_id, Some(0));
         assert_eq!(pz.euus_discount, Some(0));

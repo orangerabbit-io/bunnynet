@@ -175,15 +175,9 @@ impl From<&PaymentRequest> for PaymentRequestRow {
                 .amount
                 .map(|v| format!("{:.2}", v))
                 .unwrap_or_else(|| "-".to_string()),
-            date: pr
-                .date_generated
-                .clone()
-                .unwrap_or_else(|| "-".to_string()),
+            date: pr.date_generated.clone().unwrap_or_else(|| "-".to_string()),
             due: pr.date_due.clone().unwrap_or_else(|| "-".to_string()),
-            description: pr
-                .description
-                .clone()
-                .unwrap_or_else(|| "-".to_string()),
+            description: pr.description.clone().unwrap_or_else(|| "-".to_string()),
             paid: pr
                 .paid
                 .map(|v| v.to_string())
@@ -287,10 +281,7 @@ mod tests {
         let pr: PaymentRequest = serde_json::from_str(json).unwrap();
         assert_eq!(pr.id, Some(456));
         assert_eq!(pr.amount, Some(99.99));
-        assert_eq!(
-            pr.date_generated,
-            Some("2024-01-15T00:00:00Z".to_string())
-        );
+        assert_eq!(pr.date_generated, Some("2024-01-15T00:00:00Z".to_string()));
         assert_eq!(pr.date_due, Some("2024-02-15T00:00:00Z".to_string()));
         assert_eq!(pr.description, Some("Monthly invoice".to_string()));
         assert_eq!(pr.paid, Some(false));

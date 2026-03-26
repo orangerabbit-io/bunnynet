@@ -11,9 +11,10 @@ fn test_dns_zone_list_table() {
     let mock = server
         .mock("GET", "/dnszone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("dns_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -37,9 +38,10 @@ fn test_dns_zone_list_json() {
     let mock = server
         .mock("GET", "/dnszone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("dns_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -179,18 +181,12 @@ fn test_dns_zone_create() {
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "dns-zone",
-        "create",
-        "newzone.com",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("newzone.com"))
-    .stdout(predicate::str::contains("600"));
+    cmd.args(["--api-key", "test-key", "dns-zone", "create", "newzone.com"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("newzone.com"))
+        .stdout(predicate::str::contains("600"));
 
     mock.assert();
 }
@@ -408,7 +404,9 @@ fn test_dns_record_update() {
     .env("BUNNYNET_BASE_URL", server.url())
     .assert()
     .success()
-    .stdout(predicate::str::contains("DNS record 2001 updated in zone 500"));
+    .stdout(predicate::str::contains(
+        "DNS record 2001 updated in zone 500",
+    ));
 
     mock.assert();
 }
@@ -435,7 +433,9 @@ fn test_dns_record_delete() {
     .env("BUNNYNET_BASE_URL", server.url())
     .assert()
     .success()
-    .stdout(predicate::str::contains("DNS record 2001 deleted from zone 500"));
+    .stdout(predicate::str::contains(
+        "DNS record 2001 deleted from zone 500",
+    ));
 
     mock.assert();
 }
@@ -541,20 +541,14 @@ fn test_dns_zone_statistics_table() {
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "dns-zone",
-        "statistics",
-        "500",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("DNS Zone ID"))
-    .stdout(predicate::str::contains("500"))
-    .stdout(predicate::str::contains("Total Queries Served"))
-    .stdout(predicate::str::contains("12345"));
+    cmd.args(["--api-key", "test-key", "dns-zone", "statistics", "500"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("DNS Zone ID"))
+        .stdout(predicate::str::contains("500"))
+        .stdout(predicate::str::contains("Total Queries Served"))
+        .stdout(predicate::str::contains("12345"));
 
     mock.assert();
 }
@@ -726,7 +720,9 @@ fn test_dns_zone_certificate_issue() {
     .env("BUNNYNET_BASE_URL", server.url())
     .assert()
     .success()
-    .stdout(predicate::str::contains("Certificate issue triggered for zone 500"));
+    .stdout(predicate::str::contains(
+        "Certificate issue triggered for zone 500",
+    ));
 
     mock.assert();
 }
@@ -758,7 +754,9 @@ fn test_dns_zone_certificate_issue_with_domain() {
     .env("BUNNYNET_BASE_URL", server.url())
     .assert()
     .success()
-    .stdout(predicate::str::contains("Certificate issue triggered for zone 500"));
+    .stdout(predicate::str::contains(
+        "Certificate issue triggered for zone 500",
+    ));
 
     mock.assert();
 }

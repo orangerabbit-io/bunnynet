@@ -19,8 +19,7 @@ fn default_base_url() -> String {
 
 impl Config {
     pub fn load(api_key_override: Option<&str>) -> Result<Self> {
-        let base_url =
-            std::env::var("BUNNYNET_BASE_URL").unwrap_or_else(|_| default_base_url());
+        let base_url = std::env::var("BUNNYNET_BASE_URL").unwrap_or_else(|_| default_base_url());
 
         if let Some(key) = api_key_override {
             return Ok(Config {

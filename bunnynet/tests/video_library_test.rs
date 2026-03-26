@@ -11,9 +11,10 @@ fn test_video_library_list_table() {
     let mock = server
         .mock("GET", "/videolibrary")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("video_library_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -36,26 +37,21 @@ fn test_video_library_list_json() {
     let mock = server
         .mock("GET", "/videolibrary")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("video_library_list.json"))
         .with_header("content-type", "application/json")
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "--json",
-        "video-library",
-        "list",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("\"Items\""))
-    .stdout(predicate::str::contains("\"CurrentPage\""));
+    cmd.args(["--api-key", "test-key", "--json", "video-library", "list"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"Items\""))
+        .stdout(predicate::str::contains("\"CurrentPage\""));
 
     mock.assert();
 }
@@ -239,17 +235,11 @@ fn test_video_library_delete() {
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "video-library",
-        "delete",
-        "5001",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("deleted"));
+    cmd.args(["--api-key", "test-key", "video-library", "delete", "5001"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("deleted"));
 
     mock.assert();
 }
@@ -659,14 +649,8 @@ fn test_video_library_drm_statistics_with_dates() {
         .mock("GET", "/videolibrary/5001/drm/statistics")
         .match_header("AccessKey", "test-key")
         .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded(
-                "dateFrom".to_string(),
-                "2024-01-01".to_string(),
-            ),
-            mockito::Matcher::UrlEncoded(
-                "dateTo".to_string(),
-                "2024-01-31".to_string(),
-            ),
+            mockito::Matcher::UrlEncoded("dateFrom".to_string(), "2024-01-01".to_string()),
+            mockito::Matcher::UrlEncoded("dateTo".to_string(), "2024-01-31".to_string()),
         ]))
         .with_body(common::fixture("video_library_drm_stats.json"))
         .with_header("content-type", "application/json")
@@ -753,9 +737,10 @@ fn test_video_library_auth_error() {
     let mock = server
         .mock("GET", "/videolibrary")
         .match_header("AccessKey", "bad-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_status(401)
         .with_body("Unauthorized")
         .create();

@@ -6,8 +6,8 @@ use crate::output::{self, OutputMode};
 use bunnynet_lib::client::Client;
 use bunnynet_lib::models::dns_record::DnsRecordType;
 use bunnynet_lib::models::dns_zone::{
-    DnsZone, DnsZoneImportResult, DnsZoneRecordScanJobResponse,
-    DnsZoneRecordScanTriggerResponse, DnsZoneRow, DnsZoneStatistics,
+    DnsZone, DnsZoneImportResult, DnsZoneRecordScanJobResponse, DnsZoneRecordScanTriggerResponse,
+    DnsZoneRow, DnsZoneStatistics,
 };
 use bunnynet_lib::models::pagination::PaginatedList;
 
@@ -382,9 +382,7 @@ fn get(client: &Client, mode: OutputMode, id: i64) -> Result<()> {
                 ),
                 (
                     "Date Created",
-                    zone.date_created
-                        .clone()
-                        .unwrap_or_else(|| "-".to_string()),
+                    zone.date_created.clone().unwrap_or_else(|| "-".to_string()),
                 ),
                 (
                     "Date Modified",
@@ -412,10 +410,7 @@ fn create(client: &Client, mode: OutputMode, domain: &str) -> Result<()> {
         }
         OutputMode::Table => {
             let zone: DnsZone = resp.json()?;
-            output::print_confirm(&format!(
-                "DNS zone '{}' created (ID: {})",
-                domain, zone.id
-            ));
+            output::print_confirm(&format!("DNS zone '{}' created (ID: {})", domain, zone.id));
         }
     }
 
@@ -457,10 +452,7 @@ fn update(
         );
     }
     if let Some(lat) = log_anonymization_type {
-        body.insert(
-            "LogAnonymizationType".to_string(),
-            serde_json::json!(lat),
-        );
+        body.insert("LogAnonymizationType".to_string(), serde_json::json!(lat));
     }
     if let Some(enabled) = logging_ip_anonymization_enabled {
         body.insert(
@@ -469,10 +461,7 @@ fn update(
         );
     }
     if let Some(kt) = certificate_key_type {
-        body.insert(
-            "CertificateKeyType".to_string(),
-            serde_json::json!(kt),
-        );
+        body.insert("CertificateKeyType".to_string(), serde_json::json!(kt));
     }
 
     let path = format!("/dnszone/{}", id);
@@ -543,10 +532,9 @@ fn run_record(action: DnsRecordAction, client: &Client, mode: OutputMode) -> Res
             client, mode, zone_id, record_id, r#type, name, value, ttl, priority, weight, port,
             comment, disabled,
         ),
-        DnsRecordAction::Delete {
-            zone_id,
-            record_id,
-        } => record_delete(client, mode, zone_id, record_id),
+        DnsRecordAction::Delete { zone_id, record_id } => {
+            record_delete(client, mode, zone_id, record_id)
+        }
         DnsRecordAction::Scan { zone_id, domain } => record_scan(client, mode, zone_id, domain),
         DnsRecordAction::ScanResults { zone_id } => record_scan_results(client, mode, zone_id),
     }
@@ -732,9 +720,7 @@ fn record_scan(
         }
         OutputMode::Table => {
             let trigger: DnsZoneRecordScanTriggerResponse = resp.json()?;
-            let job_id = trigger
-                .job_id
-                .unwrap_or_else(|| "-".to_string());
+            let job_id = trigger.job_id.unwrap_or_else(|| "-".to_string());
             let status = trigger.status.unwrap_or(-1);
             let status_name = match status {
                 0 => "Pending",
@@ -773,15 +759,9 @@ fn record_scan_results(client: &Client, mode: OutputMode, zone_id: i64) -> Resul
                 _ => "Unknown",
             };
             output::print_kv(&[
-                (
-                    "Job ID",
-                    job.job_id.unwrap_or_else(|| "-".to_string()),
-                ),
+                ("Job ID", job.job_id.unwrap_or_else(|| "-".to_string())),
                 ("Zone ID", zone_id.to_string()),
-                (
-                    "Domain",
-                    job.domain.unwrap_or_else(|| "-".to_string()),
-                ),
+                ("Domain", job.domain.unwrap_or_else(|| "-".to_string())),
                 ("Status", status_name.to_string()),
                 (
                     "Created At",
@@ -798,10 +778,7 @@ fn record_scan_results(client: &Client, mode: OutputMode, zone_id: i64) -> Resul
                         .map(|r| r.len().to_string())
                         .unwrap_or_else(|| "0".to_string()),
                 ),
-                (
-                    "Error",
-                    job.error.unwrap_or_else(|| "-".to_string()),
-                ),
+                ("Error", job.error.unwrap_or_else(|| "-".to_string())),
             ]);
         }
     }

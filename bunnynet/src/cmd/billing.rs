@@ -161,8 +161,7 @@ fn payment_requests(client: &Client, mode: OutputMode) -> Result<()> {
         }
         OutputMode::Table => {
             let items: Vec<PaymentRequest> = resp.json()?;
-            let rows: Vec<PaymentRequestRow> =
-                items.iter().map(PaymentRequestRow::from).collect();
+            let rows: Vec<PaymentRequestRow> = items.iter().map(PaymentRequestRow::from).collect();
             output::print_table(&rows);
         }
     }

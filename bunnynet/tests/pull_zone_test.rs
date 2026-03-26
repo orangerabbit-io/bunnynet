@@ -11,9 +11,10 @@ fn test_pull_zone_list_table() {
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -36,9 +37,10 @@ fn test_pull_zone_list_json() {
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -235,17 +237,11 @@ fn test_pull_zone_purge_cache() {
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "pull-zone",
-        "purge-cache",
-        "1001",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("purged"));
+    cmd.args(["--api-key", "test-key", "pull-zone", "purge-cache", "1001"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("purged"));
 
     mock.assert();
 }
@@ -874,9 +870,10 @@ fn test_pull_zone_list_default_page_is_1() {
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();

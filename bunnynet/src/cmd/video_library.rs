@@ -6,8 +6,8 @@ use crate::output::{self, OutputMode};
 use bunnynet_lib::client::Client;
 use bunnynet_lib::models::pagination::PaginatedList;
 use bunnynet_lib::models::video_library::{
-    VideoLibrary, VideoLibraryDrmStatisticsModel, VideoLibraryLanguage,
-    VideoLibraryLanguageRow, VideoLibraryRow, VideoLibraryTranscriptionStatisticsModel,
+    VideoLibrary, VideoLibraryDrmStatisticsModel, VideoLibraryLanguage, VideoLibraryLanguageRow,
+    VideoLibraryRow, VideoLibraryTranscriptionStatisticsModel,
 };
 
 // --- Subcommand definitions ---
@@ -241,12 +241,8 @@ pub fn run(action: VideoLibraryAction, client: &Client, mode: OutputMode) -> Res
             "blocked referrer removed",
         ),
         VideoLibraryAction::ResetApiKey { id } => reset_api_key(client, mode, id),
-        VideoLibraryAction::ResetReadOnlyApiKey { id } => {
-            reset_read_only_api_key(client, mode, id)
-        }
-        VideoLibraryAction::Watermark { action: w_action } => {
-            run_watermark(w_action, client, mode)
-        }
+        VideoLibraryAction::ResetReadOnlyApiKey { id } => reset_read_only_api_key(client, mode, id),
+        VideoLibraryAction::Watermark { action: w_action } => run_watermark(w_action, client, mode),
         VideoLibraryAction::LiveThumbnail { action: lt_action } => {
             run_live_thumbnail(lt_action, client, mode)
         }
@@ -354,10 +350,7 @@ fn get(client: &Client, mode: OutputMode, id: i64) -> Result<()> {
             let vl: VideoLibrary = resp.json()?;
             output::print_kv(&[
                 ("ID", vl.id.to_string()),
-                (
-                    "Name",
-                    vl.name.clone().unwrap_or_else(|| "-".to_string()),
-                ),
+                ("Name", vl.name.clone().unwrap_or_else(|| "-".to_string())),
                 (
                     "Video Count",
                     vl.video_count
@@ -426,9 +419,7 @@ fn get(client: &Client, mode: OutputMode, id: i64) -> Result<()> {
                 ),
                 (
                     "Date Created",
-                    vl.date_created
-                        .clone()
-                        .unwrap_or_else(|| "-".to_string()),
+                    vl.date_created.clone().unwrap_or_else(|| "-".to_string()),
                 ),
             ]);
         }
@@ -468,22 +459,14 @@ fn create(
         }
         OutputMode::Table => {
             let vl: VideoLibrary = resp.json()?;
-            output::print_confirm(&format!(
-                "Video library '{}' created (ID: {})",
-                name, vl.id
-            ));
+            output::print_confirm(&format!("Video library '{}' created (ID: {})", name, vl.id));
         }
     }
 
     Ok(())
 }
 
-fn update(
-    client: &Client,
-    mode: OutputMode,
-    id: i64,
-    json_body: Option<String>,
-) -> Result<()> {
+fn update(client: &Client, mode: OutputMode, id: i64, json_body: Option<String>) -> Result<()> {
     let body: HashMap<String, serde_json::Value> = if let Some(ref path) = json_body {
         load_json_body(path)?
     } else {
@@ -560,8 +543,7 @@ fn referrer_action(
 
     match mode {
         OutputMode::Json => {
-            let json =
-                serde_json::json!({"status": description, "id": id, "hostname": hostname});
+            let json = serde_json::json!({"status": description, "id": id, "hostname": hostname});
             output::print_json(&json);
         }
         OutputMode::Table => {
@@ -602,10 +584,7 @@ fn reset_read_only_api_key(client: &Client, mode: OutputMode, id: i64) -> Result
             output::print_json(&json);
         }
         OutputMode::Table => {
-            output::print_confirm(&format!(
-                "Read-only API key reset for video library {}",
-                id
-            ));
+            output::print_confirm(&format!("Read-only API key reset for video library {}", id));
         }
     }
 
@@ -630,9 +609,7 @@ fn run_live_thumbnail(
         LiveThumbnailAction::Add { id, file } => {
             watermark_upload(client, mode, id, &file, "live/thumbnail")
         }
-        LiveThumbnailAction::Delete { id } => {
-            watermark_delete(client, mode, id, "live/thumbnail")
-        }
+        LiveThumbnailAction::Delete { id } => watermark_delete(client, mode, id, "live/thumbnail"),
     }
 }
 
@@ -645,9 +622,7 @@ fn run_live_watermark(
         LiveWatermarkAction::Add { id, file } => {
             watermark_upload(client, mode, id, &file, "live/watermark")
         }
-        LiveWatermarkAction::Delete { id } => {
-            watermark_delete(client, mode, id, "live/watermark")
-        }
+        LiveWatermarkAction::Delete { id } => watermark_delete(client, mode, id, "live/watermark"),
     }
 }
 
@@ -658,8 +633,8 @@ fn watermark_upload(
     file_path: &str,
     resource: &str,
 ) -> Result<()> {
-    let data = std::fs::read(file_path)
-        .with_context(|| format!("Failed to read file: {}", file_path))?;
+    let data =
+        std::fs::read(file_path).with_context(|| format!("Failed to read file: {}", file_path))?;
     let content_type = content_type_from_extension(file_path);
 
     let path = format!("/videolibrary/{}/{}", id, resource);
@@ -683,12 +658,7 @@ fn watermark_upload(
     Ok(())
 }
 
-fn watermark_delete(
-    client: &Client,
-    mode: OutputMode,
-    id: i64,
-    resource: &str,
-) -> Result<()> {
+fn watermark_delete(client: &Client, mode: OutputMode, id: i64, resource: &str) -> Result<()> {
     let path = format!("/videolibrary/{}/{}", id, resource);
     let _resp = client.delete(&path)?;
 

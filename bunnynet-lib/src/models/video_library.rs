@@ -422,14 +422,10 @@ mod tests {
             "TranscriptionSecondsChart": {"2024-01-01": 5000.0, "2024-01-02": 7000.0}
         }"#;
 
-        let stats: VideoLibraryTranscriptionStatisticsModel =
-            serde_json::from_str(json).unwrap();
+        let stats: VideoLibraryTranscriptionStatisticsModel = serde_json::from_str(json).unwrap();
         assert_eq!(stats.total_transcription_seconds, Some(36000));
         assert!(stats.transcription_seconds_chart.is_some());
-        assert_eq!(
-            stats.transcription_seconds_chart.as_ref().unwrap().len(),
-            2
-        );
+        assert_eq!(stats.transcription_seconds_chart.as_ref().unwrap().len(), 2);
     }
 
     #[test]

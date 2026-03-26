@@ -2,10 +2,10 @@ mod cmd;
 mod output;
 
 use anyhow::Result;
-use clap::{Parser, Subcommand};
-use std::process;
 use bunnynet_lib::client::Client;
 use bunnynet_lib::config::Config;
+use clap::{Parser, Subcommand};
+use std::process;
 
 #[derive(Parser)]
 #[command(name = "bunnynet", about = "CLI for the Bunny.net API")]

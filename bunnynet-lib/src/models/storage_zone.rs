@@ -244,8 +244,7 @@ mod tests {
         let json_not_supported = "0";
         let json_supported = "1";
 
-        let not_supported: StorageZoneS3Type =
-            serde_json::from_str(json_not_supported).unwrap();
+        let not_supported: StorageZoneS3Type = serde_json::from_str(json_not_supported).unwrap();
         let supported: StorageZoneS3Type = serde_json::from_str(json_supported).unwrap();
 
         assert_eq!(not_supported, StorageZoneS3Type::NotSupported);

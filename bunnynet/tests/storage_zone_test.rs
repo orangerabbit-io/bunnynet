@@ -9,9 +9,10 @@ fn test_storage_zone_list_table() {
     let mock = server
         .mock("GET", "/storagezone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("storage_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -36,26 +37,21 @@ fn test_storage_zone_list_json() {
     let mock = server
         .mock("GET", "/storagezone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
-        ]))
+        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
+            "page".to_string(),
+            "1".to_string(),
+        )]))
         .with_body(common::fixture("storage_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "--json",
-        "storage-zone",
-        "list",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("\"Items\""))
-    .stdout(predicate::str::contains("\"CurrentPage\""));
+    cmd.args(["--api-key", "test-key", "--json", "storage-zone", "list"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"Items\""))
+        .stdout(predicate::str::contains("\"CurrentPage\""));
 
     mock.assert();
 }
@@ -241,7 +237,9 @@ fn test_storage_zone_reset_password() {
     .env("BUNNYNET_BASE_URL", server.url())
     .assert()
     .success()
-    .stdout(predicate::str::contains("Password reset for storage zone 100"));
+    .stdout(predicate::str::contains(
+        "Password reset for storage zone 100",
+    ));
 
     mock.assert();
 }
@@ -272,7 +270,9 @@ fn test_storage_zone_reset_read_only_password() {
     .env("BUNNYNET_BASE_URL", server.url())
     .assert()
     .success()
-    .stdout(predicate::str::contains("Read-only password reset for storage zone 100"));
+    .stdout(predicate::str::contains(
+        "Read-only password reset for storage zone 100",
+    ));
 
     mock.assert();
 }
@@ -288,20 +288,14 @@ fn test_storage_zone_statistics_table() {
         .create();
 
     let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "storage-zone",
-        "statistics",
-        "100",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("Storage Zone ID"))
-    .stdout(predicate::str::contains("100"))
-    .stdout(predicate::str::contains("Storage Data Points"))
-    .stdout(predicate::str::contains("3"));
+    cmd.args(["--api-key", "test-key", "storage-zone", "statistics", "100"])
+        .env("BUNNYNET_BASE_URL", server.url())
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Storage Zone ID"))
+        .stdout(predicate::str::contains("100"))
+        .stdout(predicate::str::contains("Storage Data Points"))
+        .stdout(predicate::str::contains("3"));
 
     mock.assert();
 }

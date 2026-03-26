@@ -144,9 +144,7 @@ pub fn run(action: StorageZoneAction, client: &Client, mode: OutputMode) -> Resu
             id,
             delete_linked_pull_zones,
         } => delete(client, mode, id, delete_linked_pull_zones),
-        StorageZoneAction::CheckAvailability { name } => {
-            check_availability(client, mode, &name)
-        }
+        StorageZoneAction::CheckAvailability { name } => check_availability(client, mode, &name),
         StorageZoneAction::ResetPassword { id } => reset_password(client, mode, id),
         StorageZoneAction::ResetReadOnlyPassword { id } => {
             reset_read_only_password(client, mode, id)
@@ -211,10 +209,7 @@ fn get(client: &Client, mode: OutputMode, id: i64) -> Result<()> {
             let sz: StorageZone = resp.json()?;
             output::print_kv(&[
                 ("ID", sz.id.to_string()),
-                (
-                    "Name",
-                    sz.name.clone().unwrap_or_else(|| "-".to_string()),
-                ),
+                ("Name", sz.name.clone().unwrap_or_else(|| "-".to_string())),
                 (
                     "Region",
                     sz.region.clone().unwrap_or_else(|| "-".to_string()),
@@ -282,10 +277,7 @@ fn create(
 
     if let Some(rr) = replication_regions {
         let regions: Vec<&str> = rr.split(',').map(|s| s.trim()).collect();
-        body.insert(
-            "ReplicationRegions".to_string(),
-            serde_json::json!(regions),
-        );
+        body.insert("ReplicationRegions".to_string(), serde_json::json!(regions));
     }
     if let Some(zt) = zone_tier {
         body.insert("ZoneTier".to_string(), serde_json::json!(zt));
@@ -425,10 +417,7 @@ fn reset_read_only_password(client: &Client, mode: OutputMode, id: i64) -> Resul
             output::print_json(&json);
         }
         OutputMode::Table => {
-            output::print_confirm(&format!(
-                "Read-only password reset for storage zone {}",
-                id
-            ));
+            output::print_confirm(&format!("Read-only password reset for storage zone {}", id));
         }
     }
 

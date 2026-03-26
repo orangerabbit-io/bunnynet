@@ -25,12 +25,7 @@ pub fn run(action: ApiKeyAction, client: &Client, mode: OutputMode) -> Result<()
     }
 }
 
-fn list(
-    client: &Client,
-    mode: OutputMode,
-    page: Option<i32>,
-    per_page: Option<i32>,
-) -> Result<()> {
+fn list(client: &Client, mode: OutputMode, page: Option<i32>, per_page: Option<i32>) -> Result<()> {
     let mut params: Vec<(&str, String)> = Vec::new();
     if let Some(p) = page {
         params.push(("page", p.to_string()));

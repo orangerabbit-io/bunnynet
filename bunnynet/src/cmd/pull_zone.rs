@@ -343,7 +343,15 @@ pub fn run(action: PullZoneAction, client: &Client, mode: OutputMode) -> Result<
             origin_type,
             storage_zone_id,
             json_body,
-        } => create(client, mode, &name, origin_url, origin_type, storage_zone_id, json_body),
+        } => create(
+            client,
+            mode,
+            &name,
+            origin_url,
+            origin_type,
+            storage_zone_id,
+            json_body,
+        ),
         PullZoneAction::Update {
             id,
             origin_url,
@@ -353,9 +361,7 @@ pub fn run(action: PullZoneAction, client: &Client, mode: OutputMode) -> Result<
         PullZoneAction::PurgeCache { id, cache_tag } => purge_cache(client, mode, id, cache_tag),
         PullZoneAction::CheckAvailability { name } => check_availability(client, mode, &name),
         PullZoneAction::Hostname { action: h_action } => run_hostname(h_action, client, mode),
-        PullZoneAction::Certificate { action: c_action } => {
-            run_certificate(c_action, client, mode)
-        }
+        PullZoneAction::Certificate { action: c_action } => run_certificate(c_action, client, mode),
         PullZoneAction::EdgeRule { action: e_action } => run_edge_rule(e_action, client, mode),
         PullZoneAction::Referrer { action: r_action } => run_referrer(r_action, client, mode),
         PullZoneAction::BlockedIp { action: b_action } => run_blocked_ip(b_action, client, mode),
@@ -388,8 +394,8 @@ pub fn run(action: PullZoneAction, client: &Client, mode: OutputMode) -> Result<
 fn load_json_body(path: &str) -> Result<HashMap<String, serde_json::Value>> {
     let contents =
         std::fs::read_to_string(path).with_context(|| format!("Failed to read {}", path))?;
-    let value: serde_json::Value =
-        serde_json::from_str(&contents).with_context(|| format!("Failed to parse JSON from {}", path))?;
+    let value: serde_json::Value = serde_json::from_str(&contents)
+        .with_context(|| format!("Failed to parse JSON from {}", path))?;
     match value {
         serde_json::Value::Object(map) => Ok(map.into_iter().collect()),
         _ => bail!("Expected JSON object in {}", path),
@@ -475,10 +481,7 @@ fn get(client: &Client, mode: OutputMode, id: i64, include_certificate: bool) ->
             let pz: PullZone = resp.json()?;
             output::print_kv(&[
                 ("ID", pz.id.to_string()),
-                (
-                    "Name",
-                    pz.name.clone().unwrap_or_else(|| "-".to_string()),
-                ),
+                ("Name", pz.name.clone().unwrap_or_else(|| "-".to_string())),
                 (
                     "Origin URL",
                     pz.origin_url.clone().unwrap_or_else(|| "-".to_string()),
@@ -539,9 +542,7 @@ fn get(client: &Client, mode: OutputMode, id: i64, include_certificate: bool) ->
                 ),
                 (
                     "CNAME Domain",
-                    pz.cname_domain
-                        .clone()
-                        .unwrap_or_else(|| "-".to_string()),
+                    pz.cname_domain.clone().unwrap_or_else(|| "-".to_string()),
                 ),
                 (
                     "Zone Security",
@@ -669,15 +670,13 @@ fn purge_cache(
 
     match mode {
         OutputMode::Json => {
-            let json = serde_json::json!({"status": "cache_purged", "id": id, "cache_tag": cache_tag});
+            let json =
+                serde_json::json!({"status": "cache_purged", "id": id, "cache_tag": cache_tag});
             output::print_json(&json);
         }
         OutputMode::Table => {
             if let Some(tag) = cache_tag {
-                output::print_confirm(&format!(
-                    "Cache purged for pull zone {} (tag: {})",
-                    id, tag
-                ));
+                output::print_confirm(&format!("Cache purged for pull zone {} (tag: {})", id, tag));
             } else {
                 output::print_confirm(&format!("Cache purged for pull zone {}", id));
             }
@@ -736,7 +735,8 @@ fn hostname_add(client: &Client, mode: OutputMode, id: i64, hostname: &str) -> R
 
     match mode {
         OutputMode::Json => {
-            let json = serde_json::json!({"status": "hostname_added", "id": id, "hostname": hostname});
+            let json =
+                serde_json::json!({"status": "hostname_added", "id": id, "hostname": hostname});
             output::print_json(&json);
         }
         OutputMode::Table => {
@@ -759,7 +759,8 @@ fn hostname_remove(client: &Client, mode: OutputMode, id: i64, hostname: &str) -
 
     match mode {
         OutputMode::Json => {
-            let json = serde_json::json!({"status": "hostname_removed", "id": id, "hostname": hostname});
+            let json =
+                serde_json::json!({"status": "hostname_removed", "id": id, "hostname": hostname});
             output::print_json(&json);
         }
         OutputMode::Table => {
@@ -889,7 +890,8 @@ fn certificate_add(
 
     match mode {
         OutputMode::Json => {
-            let json = serde_json::json!({"status": "certificate_added", "id": id, "hostname": hostname});
+            let json =
+                serde_json::json!({"status": "certificate_added", "id": id, "hostname": hostname});
             output::print_json(&json);
         }
         OutputMode::Table => {
@@ -941,25 +943,19 @@ fn certificate_load_free(
 
     match mode {
         OutputMode::Json => {
-            let json = serde_json::json!({"status": "free_certificate_loaded", "hostname": hostname});
+            let json =
+                serde_json::json!({"status": "free_certificate_loaded", "hostname": hostname});
             output::print_json(&json);
         }
         OutputMode::Table => {
-            output::print_confirm(&format!(
-                "Free certificate loaded for '{}'",
-                hostname
-            ));
+            output::print_confirm(&format!("Free certificate loaded for '{}'", hostname));
         }
     }
 
     Ok(())
 }
 
-fn run_edge_rule(
-    action: PullZoneEdgeRuleAction,
-    client: &Client,
-    mode: OutputMode,
-) -> Result<()> {
+fn run_edge_rule(action: PullZoneEdgeRuleAction, client: &Client, mode: OutputMode) -> Result<()> {
     match action {
         PullZoneEdgeRuleAction::AddOrUpdate { id, json_body } => {
             edge_rule_add_or_update(client, mode, id, &json_body)
@@ -992,22 +988,14 @@ fn edge_rule_add_or_update(
             output::print_json(&json);
         }
         OutputMode::Table => {
-            output::print_confirm(&format!(
-                "Edge rule added/updated on pull zone {}",
-                id
-            ));
+            output::print_confirm(&format!("Edge rule added/updated on pull zone {}", id));
         }
     }
 
     Ok(())
 }
 
-fn edge_rule_delete(
-    client: &Client,
-    mode: OutputMode,
-    zone_id: i64,
-    rule_id: &str,
-) -> Result<()> {
+fn edge_rule_delete(client: &Client, mode: OutputMode, zone_id: i64, rule_id: &str) -> Result<()> {
     let path = format!("/pullzone/{}/edgerules/{}", zone_id, rule_id);
     let _resp = client.delete(&path)?;
 
@@ -1065,18 +1053,38 @@ fn edge_rule_set_enabled(
 
 fn run_referrer(action: PullZoneReferrerAction, client: &Client, mode: OutputMode) -> Result<()> {
     match action {
-        PullZoneReferrerAction::AddAllowed { id, hostname } => {
-            referrer_action(client, mode, id, &hostname, "addAllowedReferrer", "allowed referrer added")
-        }
-        PullZoneReferrerAction::RemoveAllowed { id, hostname } => {
-            referrer_action(client, mode, id, &hostname, "removeAllowedReferrer", "allowed referrer removed")
-        }
-        PullZoneReferrerAction::AddBlocked { id, hostname } => {
-            referrer_action(client, mode, id, &hostname, "addBlockedReferrer", "blocked referrer added")
-        }
-        PullZoneReferrerAction::RemoveBlocked { id, hostname } => {
-            referrer_action(client, mode, id, &hostname, "removeBlockedReferrer", "blocked referrer removed")
-        }
+        PullZoneReferrerAction::AddAllowed { id, hostname } => referrer_action(
+            client,
+            mode,
+            id,
+            &hostname,
+            "addAllowedReferrer",
+            "allowed referrer added",
+        ),
+        PullZoneReferrerAction::RemoveAllowed { id, hostname } => referrer_action(
+            client,
+            mode,
+            id,
+            &hostname,
+            "removeAllowedReferrer",
+            "allowed referrer removed",
+        ),
+        PullZoneReferrerAction::AddBlocked { id, hostname } => referrer_action(
+            client,
+            mode,
+            id,
+            &hostname,
+            "addBlockedReferrer",
+            "blocked referrer added",
+        ),
+        PullZoneReferrerAction::RemoveBlocked { id, hostname } => referrer_action(
+            client,
+            mode,
+            id,
+            &hostname,
+            "removeBlockedReferrer",
+            "blocked referrer removed",
+        ),
     }
 }
 
@@ -1116,14 +1124,9 @@ fn run_blocked_ip(
     mode: OutputMode,
 ) -> Result<()> {
     match action {
-        PullZoneBlockedIpAction::Add { id, ip } => blocked_ip_action(
-            client,
-            mode,
-            id,
-            &ip,
-            "addBlockedIp",
-            "blocked IP added",
-        ),
+        PullZoneBlockedIpAction::Add { id, ip } => {
+            blocked_ip_action(client, mode, id, &ip, "addBlockedIp", "blocked IP added")
+        }
         PullZoneBlockedIpAction::Remove { id, ip } => blocked_ip_action(
             client,
             mode,
@@ -1155,10 +1158,7 @@ fn blocked_ip_action(
             output::print_json(&json);
         }
         OutputMode::Table => {
-            output::print_confirm(&format!(
-                "'{}' {} for pull zone {}",
-                ip, description, id
-            ));
+            output::print_confirm(&format!("'{}' {} for pull zone {}", ip, description, id));
         }
     }
 
