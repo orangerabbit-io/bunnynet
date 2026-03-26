@@ -61,6 +61,12 @@ pub enum Commands {
         #[command(subcommand)]
         action: cmd::billing::BillingAction,
     },
+    /// Manage storage zones
+    #[command(name = "storage-zone")]
+    StorageZone {
+        #[command(subcommand)]
+        action: cmd::storage_zone::StorageZoneAction,
+    },
     /// View CDN statistics
     Statistics {
         /// Start date for statistics range
@@ -136,6 +142,7 @@ fn run(cli: Cli) -> Result<()> {
             cmd::search::run(&client, mode, &query, from, size)
         }
         Commands::Billing { action } => cmd::billing::run(action, &client, mode),
+        Commands::StorageZone { action } => cmd::storage_zone::run(action, &client, mode),
         Commands::Statistics {
             date_from,
             date_to,

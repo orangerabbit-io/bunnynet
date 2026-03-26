@@ -5,3 +5,4 @@ pub mod pagination;
 pub mod region;
 pub mod search;
 pub mod statistics;
+pub mod storage_zone;
