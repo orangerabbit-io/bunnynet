@@ -131,6 +131,7 @@ pub struct Client {
 - `post(path, body: &HashMap<String, Value>) -> Result<Response>`
 - `post_no_body(path) -> Result<Response>` — for endpoints with no request body (e.g., password resets)
 - `post_with_params(path, params: &[(&str, &str)]) -> Result<Response>` — for endpoints using query params on POST (e.g., `resetReadOnlyPassword?id=X`)
+- `post_text(path, body: &str) -> Result<Response>` — for raw text POST body (DNS zone import)
 - `put(path, body: &HashMap<String, Value>) -> Result<Response>`
 - `put_file(path, data: Vec<u8>, content_type: &str) -> Result<Response>` — for binary uploads (watermarks, thumbnails)
 - `delete(path) -> Result<Response>`
