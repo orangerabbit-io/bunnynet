@@ -1,0 +1,26 @@
+{
+  "Id": 500,
+  "Domain": "example.com",
+  "Records": [
+    {
+      "Id": 1001,
+      "Type": 0,
+      "Ttl": 300,
+      "Value": "1.2.3.4",
+      "Name": "www",
+      "Disabled": false
+    }
+  ],
+  "DateModified": "2024-06-15T10:30:00Z",
+  "DateCreated": "2024-01-01T00:00:00Z",
+  "NameserversDetected": true,
+  "CustomNameserversEnabled": false,
+  "Nameserver1": "ns1.bunny.net",
+  "Nameserver2": "ns2.bunny.net",
+  "SoaEmail": "admin@example.com",
+  "LoggingEnabled": true,
+  "LoggingIPAnonymizationEnabled": false,
+  "LogAnonymizationType": 0,
+  "DnsSecEnabled": true,
+  "CertificateKeyType": 0
+}

@@ -67,6 +67,12 @@ pub enum Commands {
         #[command(subcommand)]
         action: cmd::storage_zone::StorageZoneAction,
     },
+    /// Manage DNS zones
+    #[command(name = "dns-zone")]
+    DnsZone {
+        #[command(subcommand)]
+        action: cmd::dns_zone::DnsZoneAction,
+    },
     /// View CDN statistics
     Statistics {
         /// Start date for statistics range
@@ -143,6 +149,7 @@ fn run(cli: Cli) -> Result<()> {
         }
         Commands::Billing { action } => cmd::billing::run(action, &client, mode),
         Commands::StorageZone { action } => cmd::storage_zone::run(action, &client, mode),
+        Commands::DnsZone { action } => cmd::dns_zone::run(action, &client, mode),
         Commands::Statistics {
             date_from,
             date_to,

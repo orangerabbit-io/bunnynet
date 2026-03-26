@@ -1,0 +1,25 @@
+{
+  "Items": [
+    {
+      "Id": 500,
+      "Domain": "example.com",
+      "Nameserver1": "ns1.bunny.net",
+      "Nameserver2": "ns2.bunny.net",
+      "DnsSecEnabled": true,
+      "LoggingEnabled": true,
+      "DateCreated": "2024-01-01T00:00:00Z"
+    },
+    {
+      "Id": 501,
+      "Domain": "test.org",
+      "Nameserver1": "ns1.bunny.net",
+      "Nameserver2": "ns2.bunny.net",
+      "DnsSecEnabled": false,
+      "LoggingEnabled": false,
+      "DateCreated": "2024-02-01T00:00:00Z"
+    }
+  ],
+  "CurrentPage": 1,
+  "TotalItems": 2,
+  "HasMoreItems": false
+}

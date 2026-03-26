@@ -1,6 +1,7 @@
 pub mod api_key;
 pub mod billing;
 pub mod country;
+pub mod dns_zone;
 pub mod purge;
 pub mod region;
 pub mod search;

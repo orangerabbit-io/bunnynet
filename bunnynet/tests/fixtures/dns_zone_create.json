@@ -1,0 +1,10 @@
+{
+  "Id": 600,
+  "Domain": "newzone.com",
+  "Records": [],
+  "DateCreated": "2024-06-20T00:00:00Z",
+  "Nameserver1": "ns1.bunny.net",
+  "Nameserver2": "ns2.bunny.net",
+  "DnsSecEnabled": false,
+  "LoggingEnabled": false
+}
