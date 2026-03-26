@@ -56,6 +56,48 @@ pub enum Commands {
         #[arg(long)]
         size: Option<i64>,
     },
+    /// View CDN statistics
+    Statistics {
+        /// Start date for statistics range
+        #[arg(long)]
+        date_from: Option<String>,
+        /// End date for statistics range
+        #[arg(long)]
+        date_to: Option<String>,
+        /// Filter by pull zone ID
+        #[arg(long)]
+        pull_zone: Option<i64>,
+        /// Filter by server zone ID
+        #[arg(long)]
+        server_zone_id: Option<i64>,
+        /// Return hourly grouping
+        #[arg(long)]
+        hourly: bool,
+        /// Load error response charts
+        #[arg(long)]
+        load_errors: bool,
+        /// Load origin response time data
+        #[arg(long)]
+        load_origin_response_times: bool,
+        /// Load requests served data
+        #[arg(long)]
+        load_requests_served: bool,
+        /// Load bandwidth used data
+        #[arg(long)]
+        load_bandwidth_used: bool,
+        /// Load origin traffic data
+        #[arg(long)]
+        load_origin_traffic: bool,
+        /// Load origin shield bandwidth data
+        #[arg(long)]
+        load_origin_shield_bandwidth: bool,
+        /// Load geographic traffic distribution data
+        #[arg(long)]
+        load_geographic_traffic_distribution: bool,
+        /// Load user balance history data
+        #[arg(long)]
+        load_user_balance_history: bool,
+    },
 }
 
 fn main() {
@@ -88,5 +130,36 @@ fn run(cli: Cli) -> Result<()> {
         Commands::Search { query, from, size } => {
             cmd::search::run(&client, mode, &query, from, size)
         }
+        Commands::Statistics {
+            date_from,
+            date_to,
+            pull_zone,
+            server_zone_id,
+            hourly,
+            load_errors,
+            load_origin_response_times,
+            load_requests_served,
+            load_bandwidth_used,
+            load_origin_traffic,
+            load_origin_shield_bandwidth,
+            load_geographic_traffic_distribution,
+            load_user_balance_history,
+        } => cmd::statistics::run(
+            &client,
+            mode,
+            date_from,
+            date_to,
+            pull_zone,
+            server_zone_id,
+            hourly,
+            load_errors,
+            load_origin_response_times,
+            load_requests_served,
+            load_bandwidth_used,
+            load_origin_traffic,
+            load_origin_shield_bandwidth,
+            load_geographic_traffic_distribution,
+            load_user_balance_history,
+        ),
     }
 }

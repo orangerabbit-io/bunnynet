@@ -3,3 +3,4 @@ pub mod country;
 pub mod purge;
 pub mod region;
 pub mod search;
+pub mod statistics;
