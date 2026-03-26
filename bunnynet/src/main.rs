@@ -1,5 +1,4 @@
 mod cmd;
-#[allow(dead_code)]
 mod output;
 
 use anyhow::Result;
@@ -24,9 +23,41 @@ pub struct Cli {
 }
 
 #[derive(Subcommand)]
-pub enum Commands {}
+pub enum Commands {
+    /// Manage regions
+    Region {
+        #[command(subcommand)]
+        action: cmd::region::RegionAction,
+    },
+    /// Manage countries
+    Country {
+        #[command(subcommand)]
+        action: cmd::country::CountryAction,
+    },
+    /// Manage API keys
+    #[command(name = "api-key")]
+    ApiKey {
+        #[command(subcommand)]
+        action: cmd::api_key::ApiKeyAction,
+    },
+    /// Purge CDN cache
+    Purge {
+        #[command(subcommand)]
+        action: cmd::purge::PurgeAction,
+    },
+    /// Search across all resources
+    Search {
+        /// Search query
+        query: String,
+        /// Number of results to skip
+        #[arg(long)]
+        from: Option<i64>,
+        /// Maximum number of results
+        #[arg(long)]
+        size: Option<i64>,
+    },
+}
 
-#[allow(unreachable_code, unused_variables)]
 fn main() {
     let cli = Cli::parse();
 
@@ -49,7 +80,13 @@ fn run(cli: Cli) -> Result<()> {
     let config = Config::load(cli.api_key.as_deref())?;
     let client = Client::new(config.api_key, config.base_url)?;
     let mode = output::OutputMode::from_json_flag(cli.json);
-    let _ = (&client, mode); // suppress unused warnings until commands are added
-
-    match cli.command {}
+    match cli.command {
+        Commands::Region { action } => cmd::region::run(action, &client, mode),
+        Commands::Country { action } => cmd::country::run(action, &client, mode),
+        Commands::ApiKey { action } => cmd::api_key::run(action, &client, mode),
+        Commands::Purge { action } => cmd::purge::run(action, &client, mode),
+        Commands::Search { query, from, size } => {
+            cmd::search::run(&client, mode, &query, from, size)
+        }
+    }
 }

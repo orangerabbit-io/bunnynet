@@ -34,6 +34,7 @@ pub fn print_table<T: Tabled>(items: &[T]) {
     println!("{}", table);
 }
 
+#[allow(dead_code)]
 pub fn print_kv(pairs: &[(&str, String)]) {
     let max_key_len = pairs.iter().map(|(k, _)| k.len()).max().unwrap_or(0);
     for (key, value) in pairs {
