@@ -9,7 +9,6 @@ use bunnynet_lib::models::dns_zone::{
     DnsZone, DnsZoneImportResult, DnsZoneRecordScanJobResponse, DnsZoneRecordScanTriggerResponse,
     DnsZoneRow, DnsZoneStatistics,
 };
-use bunnynet_lib::models::pagination::PaginatedList;
 
 #[derive(Subcommand)]
 pub enum DnsZoneAction {
@@ -18,12 +17,6 @@ pub enum DnsZoneAction {
         /// Search query
         #[arg(long)]
         search: Option<String>,
-        /// Page number (starts at 1)
-        #[arg(long, default_value = "1")]
-        page: i32,
-        /// Items per page
-        #[arg(long)]
-        per_page: Option<i32>,
     },
     /// Get a DNS zone by ID
     Get {
@@ -234,11 +227,7 @@ pub enum DnsCertificateAction {
 
 pub fn run(action: DnsZoneAction, client: &Client, mode: OutputMode) -> Result<()> {
     match action {
-        DnsZoneAction::List {
-            search,
-            page,
-            per_page,
-        } => list(client, mode, search, page, per_page),
+        DnsZoneAction::List { search } => list(client, mode, search),
         DnsZoneAction::Get { id } => get(client, mode, id),
         DnsZoneAction::Create { domain } => create(client, mode, &domain),
         DnsZoneAction::Update {
@@ -285,35 +274,22 @@ pub fn run(action: DnsZoneAction, client: &Client, mode: OutputMode) -> Result<(
 
 // --- DNS Zone CRUD ---
 
-fn list(
-    client: &Client,
-    mode: OutputMode,
-    search: Option<String>,
-    page: i32,
-    per_page: Option<i32>,
-) -> Result<()> {
-    let page_str = page.to_string();
-    let mut params: Vec<(&str, String)> = vec![("page", page_str)];
+fn list(client: &Client, mode: OutputMode, search: Option<String>) -> Result<()> {
+    let mut params: Vec<(&str, &str)> = Vec::new();
     if let Some(ref s) = search {
-        params.push(("search", s.clone()));
+        params.push(("search", s.as_str()));
     }
-    if let Some(pp) = per_page {
-        params.push(("perPage", pp.to_string()));
-    }
-    let params_ref: Vec<(&str, &str)> = params.iter().map(|(k, v)| (*k, v.as_str())).collect();
 
-    let resp = client.get_with_params("/dnszone", &params_ref)?;
+    let items: Vec<DnsZone> = client.fetch_all_pages("/dnszone", &params)?;
 
     match mode {
         OutputMode::Json => {
-            let json: serde_json::Value = resp.json()?;
+            let json = serde_json::to_value(&items)?;
             output::print_json(&json);
         }
         OutputMode::Table => {
-            let list: PaginatedList<DnsZone> = resp.json()?;
-            let rows: Vec<DnsZoneRow> = list.items.iter().map(DnsZoneRow::from).collect();
+            let rows: Vec<DnsZoneRow> = items.iter().map(DnsZoneRow::from).collect();
             output::print_table(&rows);
-            output::print_pagination(list.current_page, list.total_items, list.has_more_items);
         }
     }
 

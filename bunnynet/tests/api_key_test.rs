@@ -9,6 +9,10 @@ fn test_api_key_list_table() {
     let mock = server
         .mock("GET", "/apikey")
         .match_header("AccessKey", "test-key")
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("api_key_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -19,8 +23,7 @@ fn test_api_key_list_table() {
         .assert()
         .success()
         .stdout(predicate::str::contains("key-abc-123"))
-        .stdout(predicate::str::contains("key-def-456"))
-        .stdout(predicate::str::contains("Page 1"));
+        .stdout(predicate::str::contains("key-def-456"));
 
     mock.assert();
 }
@@ -31,6 +34,10 @@ fn test_api_key_list_json() {
     let mock = server
         .mock("GET", "/apikey")
         .match_header("AccessKey", "test-key")
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("api_key_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -40,8 +47,8 @@ fn test_api_key_list_json() {
         .env("BUNNYNET_BASE_URL", server.url())
         .assert()
         .success()
-        .stdout(predicate::str::contains("\"Items\""))
-        .stdout(predicate::str::contains("\"CurrentPage\""));
+        .stdout(predicate::str::contains("key-abc-123"))
+        .stdout(predicate::str::contains("key-def-456"));
 
     mock.assert();
 }
@@ -51,6 +58,7 @@ fn test_api_key_list_auth_error() {
     let mut server = Server::new();
     let mock = server
         .mock("GET", "/apikey")
+        .match_query(mockito::Matcher::Any)
         .with_status(401)
         .with_body(r#"{"Message":"Authentication failed"}"#)
         .create();

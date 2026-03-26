@@ -11,10 +11,10 @@ fn test_dns_zone_list_table() {
     let mock = server
         .mock("GET", "/dnszone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
-            "page".to_string(),
-            "1".to_string(),
-        )]))
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("dns_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -26,8 +26,7 @@ fn test_dns_zone_list_table() {
         .success()
         .stdout(predicate::str::contains("example.com"))
         .stdout(predicate::str::contains("test.org"))
-        .stdout(predicate::str::contains("ns1.bunny.net"))
-        .stdout(predicate::str::contains("Page 1"));
+        .stdout(predicate::str::contains("ns1.bunny.net"));
 
     mock.assert();
 }
@@ -38,10 +37,10 @@ fn test_dns_zone_list_json() {
     let mock = server
         .mock("GET", "/dnszone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
-            "page".to_string(),
-            "1".to_string(),
-        )]))
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("dns_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -51,41 +50,8 @@ fn test_dns_zone_list_json() {
         .env("BUNNYNET_BASE_URL", server.url())
         .assert()
         .success()
-        .stdout(predicate::str::contains("\"Items\""))
-        .stdout(predicate::str::contains("\"CurrentPage\""));
-
-    mock.assert();
-}
-
-#[test]
-fn test_dns_zone_list_with_pagination() {
-    let mut server = Server::new();
-    let mock = server
-        .mock("GET", "/dnszone")
-        .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "2".to_string()),
-            mockito::Matcher::UrlEncoded("perPage".to_string(), "10".to_string()),
-        ]))
-        .with_body(common::fixture("dns_zone_list.json"))
-        .with_header("content-type", "application/json")
-        .create();
-
-    let mut cmd = common::binary();
-    cmd.args([
-        "--api-key",
-        "test-key",
-        "dns-zone",
-        "list",
-        "--page",
-        "2",
-        "--per-page",
-        "10",
-    ])
-    .env("BUNNYNET_BASE_URL", server.url())
-    .assert()
-    .success()
-    .stdout(predicate::str::contains("example.com"));
+        .stdout(predicate::str::contains("example.com"))
+        .stdout(predicate::str::contains("test.org"));
 
     mock.assert();
 }
@@ -97,8 +63,9 @@ fn test_dns_zone_list_with_search() {
         .mock("GET", "/dnszone")
         .match_header("AccessKey", "test-key")
         .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
             mockito::Matcher::UrlEncoded("search".to_string(), "example".to_string()),
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
         ]))
         .with_body(common::fixture("dns_zone_list.json"))
         .with_header("content-type", "application/json")

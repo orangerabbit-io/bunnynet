@@ -5,7 +5,6 @@ use std::collections::HashMap;
 
 use crate::output::{self, OutputMode};
 use bunnynet_lib::client::Client;
-use bunnynet_lib::models::pagination::PaginatedList;
 use bunnynet_lib::models::pull_zone::{
     OptimizerStatisticsModel, OriginShieldConcurrencyStatisticsModel, PullZone, PullZoneRow,
     SafeHopStatisticsModel,
@@ -20,12 +19,6 @@ pub enum PullZoneAction {
         /// Search query
         #[arg(long)]
         search: Option<String>,
-        /// Page number (starts at 1)
-        #[arg(long, default_value = "1")]
-        page: i32,
-        /// Items per page
-        #[arg(long)]
-        per_page: Option<i32>,
         /// Include certificate data in response
         #[arg(long)]
         include_certificate: bool,
@@ -329,10 +322,8 @@ pub fn run(action: PullZoneAction, client: &Client, mode: OutputMode) -> Result<
     match action {
         PullZoneAction::List {
             search,
-            page,
-            per_page,
             include_certificate,
-        } => list(client, mode, search, page, per_page, include_certificate),
+        } => list(client, mode, search, include_certificate),
         PullZoneAction::Get {
             id,
             include_certificate,
@@ -427,35 +418,26 @@ fn list(
     client: &Client,
     mode: OutputMode,
     search: Option<String>,
-    page: i32,
-    per_page: Option<i32>,
     include_certificate: bool,
 ) -> Result<()> {
-    let page_str = page.to_string();
-    let mut params: Vec<(&str, String)> = vec![("page", page_str)];
+    let mut params: Vec<(&str, &str)> = Vec::new();
     if let Some(ref s) = search {
-        params.push(("search", s.clone()));
-    }
-    if let Some(pp) = per_page {
-        params.push(("perPage", pp.to_string()));
+        params.push(("search", s.as_str()));
     }
     if include_certificate {
-        params.push(("includeCertificate", "true".to_string()));
+        params.push(("includeCertificate", "true"));
     }
-    let params_ref: Vec<(&str, &str)> = params.iter().map(|(k, v)| (*k, v.as_str())).collect();
 
-    let resp = client.get_with_params("/pullzone", &params_ref)?;
+    let items: Vec<PullZone> = client.fetch_all_pages("/pullzone", &params)?;
 
     match mode {
         OutputMode::Json => {
-            let json: serde_json::Value = resp.json()?;
+            let json = serde_json::to_value(&items)?;
             output::print_json(&json);
         }
         OutputMode::Table => {
-            let list: PaginatedList<PullZone> = resp.json()?;
-            let rows: Vec<PullZoneRow> = list.items.iter().map(PullZoneRow::from).collect();
+            let rows: Vec<PullZoneRow> = items.iter().map(PullZoneRow::from).collect();
             output::print_table(&rows);
-            output::print_pagination(list.current_page, list.total_items, list.has_more_items);
         }
     }
 

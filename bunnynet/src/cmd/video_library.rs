@@ -4,7 +4,6 @@ use std::collections::HashMap;
 
 use crate::output::{self, OutputMode};
 use bunnynet_lib::client::Client;
-use bunnynet_lib::models::pagination::PaginatedList;
 use bunnynet_lib::models::video_library::{
     VideoLibrary, VideoLibraryDrmStatisticsModel, VideoLibraryLanguage, VideoLibraryLanguageRow,
     VideoLibraryRow, VideoLibraryTranscriptionStatisticsModel,
@@ -19,12 +18,6 @@ pub enum VideoLibraryAction {
         /// Search query
         #[arg(long)]
         search: Option<String>,
-        /// Page number (starts at 1)
-        #[arg(long, default_value = "1")]
-        page: i32,
-        /// Items per page
-        #[arg(long)]
-        per_page: Option<i32>,
     },
     /// Get a video library by ID
     Get {
@@ -194,11 +187,7 @@ pub enum LiveWatermarkAction {
 #[allow(clippy::too_many_lines)]
 pub fn run(action: VideoLibraryAction, client: &Client, mode: OutputMode) -> Result<()> {
     match action {
-        VideoLibraryAction::List {
-            search,
-            page,
-            per_page,
-        } => list(client, mode, search, page, per_page),
+        VideoLibraryAction::List { search } => list(client, mode, search),
         VideoLibraryAction::Get { id } => get(client, mode, id),
         VideoLibraryAction::Create {
             name,
@@ -302,35 +291,22 @@ fn content_type_from_extension(path: &str) -> &'static str {
 
 // --- Task 22: Video Library CRUD + Languages ---
 
-fn list(
-    client: &Client,
-    mode: OutputMode,
-    search: Option<String>,
-    page: i32,
-    per_page: Option<i32>,
-) -> Result<()> {
-    let page_str = page.to_string();
-    let mut params: Vec<(&str, String)> = vec![("page", page_str)];
+fn list(client: &Client, mode: OutputMode, search: Option<String>) -> Result<()> {
+    let mut params: Vec<(&str, &str)> = Vec::new();
     if let Some(ref s) = search {
-        params.push(("search", s.clone()));
+        params.push(("search", s.as_str()));
     }
-    if let Some(pp) = per_page {
-        params.push(("perPage", pp.to_string()));
-    }
-    let params_ref: Vec<(&str, &str)> = params.iter().map(|(k, v)| (*k, v.as_str())).collect();
 
-    let resp = client.get_with_params("/videolibrary", &params_ref)?;
+    let items: Vec<VideoLibrary> = client.fetch_all_pages("/videolibrary", &params)?;
 
     match mode {
         OutputMode::Json => {
-            let json: serde_json::Value = resp.json()?;
+            let json = serde_json::to_value(&items)?;
             output::print_json(&json);
         }
         OutputMode::Table => {
-            let list: PaginatedList<VideoLibrary> = resp.json()?;
-            let rows: Vec<VideoLibraryRow> = list.items.iter().map(VideoLibraryRow::from).collect();
+            let rows: Vec<VideoLibraryRow> = items.iter().map(VideoLibraryRow::from).collect();
             output::print_table(&rows);
-            output::print_pagination(list.current_page, list.total_items, list.has_more_items);
         }
     }
 

@@ -11,10 +11,10 @@ fn test_pull_zone_list_table() {
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
-            "page".to_string(),
-            "1".to_string(),
-        )]))
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -25,8 +25,7 @@ fn test_pull_zone_list_table() {
         .assert()
         .success()
         .stdout(predicate::str::contains("my-cdn"))
-        .stdout(predicate::str::contains("static-assets"))
-        .stdout(predicate::str::contains("Page 1"));
+        .stdout(predicate::str::contains("static-assets"));
 
     mock.assert();
 }
@@ -37,10 +36,10 @@ fn test_pull_zone_list_json() {
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
-            "page".to_string(),
-            "1".to_string(),
-        )]))
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();
@@ -50,22 +49,22 @@ fn test_pull_zone_list_json() {
         .env("BUNNYNET_BASE_URL", server.url())
         .assert()
         .success()
-        .stdout(predicate::str::contains("\"Items\""))
-        .stdout(predicate::str::contains("\"CurrentPage\""));
+        .stdout(predicate::str::contains("my-cdn"))
+        .stdout(predicate::str::contains("static-assets"));
 
     mock.assert();
 }
 
 #[test]
-fn test_pull_zone_list_with_search_and_pagination() {
+fn test_pull_zone_list_with_search() {
     let mut server = Server::new();
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
         .match_query(mockito::Matcher::AllOf(vec![
-            mockito::Matcher::UrlEncoded("page".to_string(), "2".to_string()),
-            mockito::Matcher::UrlEncoded("perPage".to_string(), "10".to_string()),
             mockito::Matcher::UrlEncoded("search".to_string(), "cdn".to_string()),
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
         ]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
@@ -77,10 +76,6 @@ fn test_pull_zone_list_with_search_and_pagination() {
         "test-key",
         "pull-zone",
         "list",
-        "--page",
-        "2",
-        "--per-page",
-        "10",
         "--search",
         "cdn",
     ])
@@ -864,16 +859,16 @@ fn test_pull_zone_statistics_with_date_params() {
 
 #[test]
 fn test_pull_zone_list_default_page_is_1() {
-    // Verify that the default page is 1 (not 0), since Bunny returns
+    // Verify that auto-pagination starts at page=1 (not 0), since Bunny returns
     // a plain array for page=0 but PaginatedList for page>=1
     let mut server = Server::new();
     let mock = server
         .mock("GET", "/pullzone")
         .match_header("AccessKey", "test-key")
-        .match_query(mockito::Matcher::AllOf(vec![mockito::Matcher::UrlEncoded(
-            "page".to_string(),
-            "1".to_string(),
-        )]))
+        .match_query(mockito::Matcher::AllOf(vec![
+            mockito::Matcher::UrlEncoded("page".to_string(), "1".to_string()),
+            mockito::Matcher::UrlEncoded("perPage".to_string(), "1000".to_string()),
+        ]))
         .with_body(common::fixture("pull_zone_list.json"))
         .with_header("content-type", "application/json")
         .create();

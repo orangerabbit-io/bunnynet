@@ -4,7 +4,6 @@ use std::collections::HashMap;
 
 use crate::output::{self, OutputMode};
 use bunnynet_lib::client::Client;
-use bunnynet_lib::models::pagination::PaginatedList;
 use bunnynet_lib::models::storage_zone::{StorageZone, StorageZoneRow, StorageZoneStatistics};
 
 #[derive(Subcommand)]
@@ -14,12 +13,6 @@ pub enum StorageZoneAction {
         /// Search query
         #[arg(long)]
         search: Option<String>,
-        /// Page number (starts at 1)
-        #[arg(long, default_value = "1")]
-        page: i32,
-        /// Items per page
-        #[arg(long)]
-        per_page: Option<i32>,
         /// Include deleted storage zones
         #[arg(long)]
         include_deleted: bool,
@@ -105,10 +98,8 @@ pub fn run(action: StorageZoneAction, client: &Client, mode: OutputMode) -> Resu
     match action {
         StorageZoneAction::List {
             search,
-            page,
-            per_page,
             include_deleted,
-        } => list(client, mode, search, page, per_page, include_deleted),
+        } => list(client, mode, search, include_deleted),
         StorageZoneAction::Get { id } => get(client, mode, id),
         StorageZoneAction::Create {
             name,
@@ -161,35 +152,26 @@ fn list(
     client: &Client,
     mode: OutputMode,
     search: Option<String>,
-    page: i32,
-    per_page: Option<i32>,
     include_deleted: bool,
 ) -> Result<()> {
-    let page_str = page.to_string();
-    let mut params: Vec<(&str, String)> = vec![("page", page_str.clone())];
+    let mut params: Vec<(&str, &str)> = Vec::new();
     if let Some(ref s) = search {
-        params.push(("search", s.clone()));
-    }
-    if let Some(pp) = per_page {
-        params.push(("perPage", pp.to_string()));
+        params.push(("search", s.as_str()));
     }
     if include_deleted {
-        params.push(("includeDeleted", "true".to_string()));
+        params.push(("includeDeleted", "true"));
     }
-    let params_ref: Vec<(&str, &str)> = params.iter().map(|(k, v)| (*k, v.as_str())).collect();
 
-    let resp = client.get_with_params("/storagezone", &params_ref)?;
+    let items: Vec<StorageZone> = client.fetch_all_pages("/storagezone", &params)?;
 
     match mode {
         OutputMode::Json => {
-            let json: serde_json::Value = resp.json()?;
+            let json = serde_json::to_value(&items)?;
             output::print_json(&json);
         }
         OutputMode::Table => {
-            let list: PaginatedList<StorageZone> = resp.json()?;
-            let rows: Vec<StorageZoneRow> = list.items.iter().map(StorageZoneRow::from).collect();
+            let rows: Vec<StorageZoneRow> = items.iter().map(StorageZoneRow::from).collect();
             output::print_table(&rows);
-            output::print_pagination(list.current_page, list.total_items, list.has_more_items);
         }
     }
 

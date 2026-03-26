@@ -46,18 +46,6 @@ pub fn print_confirm(message: &str) {
     println!("{}", message);
 }
 
-pub fn print_pagination(current_page: i32, total_items: i32, has_more_items: bool) {
-    let suffix = if has_more_items {
-        ", more available"
-    } else {
-        ""
-    };
-    println!(
-        "Page {} ({} total items{})",
-        current_page, total_items, suffix
-    );
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

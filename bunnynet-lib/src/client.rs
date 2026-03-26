@@ -4,6 +4,8 @@ use reqwest::header::{HeaderMap, HeaderValue, ACCEPT_ENCODING};
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
 
+use crate::models::pagination::PaginatedList;
+
 pub struct Client {
     http: HttpClient,
     base_url: String,
@@ -170,6 +172,41 @@ impl Client {
             .send()
             .with_context(|| format!("Request failed: DELETE {}", url))?;
         Self::check_status(resp)
+    }
+
+    /// Fetch all pages of a paginated list endpoint, returning a combined Vec of items.
+    /// `params` should contain any extra query parameters (e.g. search, includeDeleted)
+    /// but NOT page or perPage — those are managed automatically.
+    pub fn fetch_all_pages<T: DeserializeOwned>(
+        &self,
+        path: &str,
+        params: &[(&str, &str)],
+    ) -> Result<Vec<T>> {
+        let mut all_items = Vec::new();
+        let mut page: i32 = 1;
+        loop {
+            let mut page_params: Vec<(&str, String)> = params
+                .iter()
+                .map(|(k, v)| (*k, v.to_string()))
+                .collect();
+            page_params.push(("page", page.to_string()));
+            page_params.push(("perPage", "1000".to_string()));
+
+            let params_ref: Vec<(&str, &str)> =
+                page_params.iter().map(|(k, v)| (*k, v.as_str())).collect();
+
+            let resp = self.get_with_params(path, &params_ref)?;
+            let list: PaginatedList<T> = resp
+                .json()
+                .context("Failed to parse paginated response")?;
+            all_items.extend(list.items);
+
+            if !list.has_more_items {
+                break;
+            }
+            page += 1;
+        }
+        Ok(all_items)
     }
 
     fn check_status(resp: Response) -> Result<Response> {
