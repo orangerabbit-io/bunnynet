@@ -79,6 +79,12 @@ pub enum Commands {
         #[command(subcommand)]
         action: cmd::pull_zone::PullZoneAction,
     },
+    /// Manage video libraries
+    #[command(name = "video-library")]
+    VideoLibrary {
+        #[command(subcommand)]
+        action: cmd::video_library::VideoLibraryAction,
+    },
     /// View CDN statistics
     Statistics {
         /// Start date for statistics range
@@ -157,6 +163,7 @@ fn run(cli: Cli) -> Result<()> {
         Commands::StorageZone { action } => cmd::storage_zone::run(action, &client, mode),
         Commands::DnsZone { action } => cmd::dns_zone::run(action, &client, mode),
         Commands::PullZone { action } => cmd::pull_zone::run(action, &client, mode),
+        Commands::VideoLibrary { action } => cmd::video_library::run(action, &client, mode),
         Commands::Statistics {
             date_from,
             date_to,

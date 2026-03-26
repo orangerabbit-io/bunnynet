@@ -1,0 +1,12 @@
+{
+  "Id": 6001,
+  "Name": "new-video-lib",
+  "VideoCount": 0,
+  "TrafficUsage": 0,
+  "StorageUsage": 0,
+  "PullZoneId": 2010,
+  "StorageZoneId": 3010,
+  "EnableDRM": false,
+  "PlayerVersion": 2,
+  "EncodingTier": 0
+}
