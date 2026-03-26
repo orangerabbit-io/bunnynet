@@ -4,11 +4,15 @@ Rust CLI and client library for the Bunny.net Core Platform API, following the s
 
 ## Phasing
 
-- **Phase 1 (this spec):** Core API — Pull Zones, Storage Zones, DNS Zones, Video Libraries, Billing, Statistics, Purge, Regions, Search, API Keys (64 paths, 110 schemas)
+- **Phase 1 (this spec):** Core API — Pull Zones, Storage Zones, DNS Zones, Video Libraries, Billing, Statistics, Purge, Regions, Search, API Keys, Countries (70 paths, 110 schemas)
 - **Phase 2:** Shield (WAF/DDoS/rate limiting) + Compute (edge scripts)
 - **Phase 3:** Edge Storage file ops, Stream Video, Database, Magic Containers
 
 Each phase adds new cmd + model modules to the existing workspace. No refactoring required between phases.
+
+**Explicitly deferred from Phase 1:**
+- `POST /user/closeaccount` — destructive account operation, no CLI use case
+- `GET /user/audit/{date}` — audit log, low priority for initial release
 
 ## Project Structure
 
@@ -25,6 +29,7 @@ bunnynet/
 │   │       ├── mod.rs
 │   │       ├── api_key.rs
 │   │       ├── billing.rs
+│   │       ├── country.rs
 │   │       ├── dns_zone.rs
 │   │       ├── pull_zone.rs
 │   │       ├── purge.rs
@@ -46,11 +51,11 @@ bunnynet/
 │           ├── mod.rs
 │           ├── api_key.rs
 │           ├── billing.rs
+│           ├── country.rs
 │           ├── dns_zone.rs
 │           ├── dns_record.rs
-│           ├── edge_rule.rs
 │           ├── pagination.rs
-│           ├── pull_zone.rs
+│           ├── pull_zone.rs      # includes edge rule, hostname, trigger models
 │           ├── region.rs
 │           ├── search.rs
 │           ├── statistics.rs
@@ -58,6 +63,7 @@ bunnynet/
 │           └── video_library.rs
 ├── Cargo.toml                    # Workspace root
 ├── Cargo.lock
+├── CLAUDE.md
 ├── flake.nix
 ├── .releaserc.json
 ├── package.json
@@ -121,8 +127,12 @@ pub struct Client {
 - `get_with_params(path, params: &[(&str, &str)]) -> Result<Response>`
 - `get_json<T: DeserializeOwned>(path) -> Result<T>`
 - `get_json_with_params<T: DeserializeOwned>(path, params) -> Result<T>`
+- `get_bytes(path) -> Result<Vec<u8>>` — for binary downloads (PDF invoices)
 - `post(path, body: &HashMap<String, Value>) -> Result<Response>`
+- `post_no_body(path) -> Result<Response>` — for endpoints with no request body (e.g., password resets)
+- `post_with_params(path, params: &[(&str, &str)]) -> Result<Response>` — for endpoints using query params on POST (e.g., `resetReadOnlyPassword?id=X`)
 - `put(path, body: &HashMap<String, Value>) -> Result<Response>`
+- `put_file(path, data: Vec<u8>, content_type: &str) -> Result<Response>` — for binary uploads (watermarks, thumbnails)
 - `delete(path) -> Result<Response>`
 - `delete_with_body(path, body) -> Result<Response>`
 
@@ -167,9 +177,12 @@ pub struct StorageZone {
 
 **Large models** (PullZone: 180+ fields, VideoLibrary: 90+ fields): All fields `Option<T>` except `id`. Row types surface only the most useful columns. Full data available via `--json`.
 
-**Integer enums:** Bunny uses integer enums throughout. Mapped to Rust enums:
+**Integer enums:** Bunny uses integer enums throughout. Use the `serde_repr` crate for automatic integer ↔ enum serialization:
 ```rust
-#[derive(Debug, Deserialize, Serialize, Clone, Copy)]
+use serde_repr::{Deserialize_repr, Serialize_repr};
+
+#[derive(Debug, Deserialize_repr, Serialize_repr, Clone, Copy)]
+#[repr(i32)]
 pub enum DnsRecordType {
     A = 0,
     AAAA = 1,
@@ -190,7 +203,7 @@ pub enum DnsRecordType {
 }
 ```
 
-Custom `Deserialize`/`Serialize` impls to handle integer ↔ enum conversion. `Display` impl for human-readable names in table output.
+`Display` impl for human-readable names in table output. `serde_repr` handles the integer ↔ enum conversion automatically.
 
 **Generic pagination wrapper:**
 ```rust
@@ -225,18 +238,23 @@ pub struct Cli {
 }
 ```
 
-### Command mapping (10 top-level subcommands)
+### Command mapping (12 top-level subcommands)
 
 **Simple resources (flat enum):**
 
 | Command | Subcommands |
 |---------|-------------|
 | `api-key` | `list` |
-| `billing` | `get`, `summary`, `affiliate`, `invoice <ID>`, `payment-requests` |
+| `billing` | `get`, `summary`, `affiliate`, `payment-requests`, `download-invoice <ID> --output <FILE>`, `download-summary <ID> --output <FILE>` |
+| `country` | `list` |
 | `purge` | `url <URL> [--async] [--exact-path]` |
 | `region` | `list` |
 | `search` | `<QUERY> [--from] [--size]` |
-| `statistics` | `[--date-from] [--date-to] [--pull-zone] [--hourly] ...` |
+| `statistics` | `[--date-from] [--date-to] [--pull-zone] [--server-zone-id] [--hourly] [--load-errors] [--load-origin-response-times] [--load-requests-served] [--load-bandwidth-used] [--load-origin-traffic] [--load-origin-shield-bandwidth] [--load-geographic-traffic-distribution] [--load-user-balance-history]` |
+
+The `billing download-invoice` and `download-summary` commands download PDF files using `get_bytes` and write to the specified output file. These are the only commands that produce binary output rather than table/JSON.
+- `download-invoice <ID> --output <FILE>` maps to `GET /billing/payment-request-invoice/{id}/pdf`
+- `download-summary <ID> --output <FILE>` maps to `GET /billing/summary/{billingRecordId}/pdf`
 
 **Storage zones (flat enum with actions):**
 
@@ -247,7 +265,7 @@ storage-zone create <NAME> --region <REGION> [--replication-regions] [--zone-tie
 storage-zone update <ID> [--origin-url] [--custom-404-file-path] [--rewrite-404-to-200]
 storage-zone delete <ID> [--delete-linked-pull-zones]
 storage-zone reset-password <ID>
-storage-zone reset-read-only-password <ID>
+storage-zone reset-read-only-password --id <ID>    # Note: API uses query param, not path param
 storage-zone statistics <ID> [--date-from] [--date-to]
 storage-zone check-availability <NAME>
 ```
@@ -269,8 +287,8 @@ dns-zone dnssec disable <ID>
 dns-zone record add <ZONE_ID> --type <TYPE> --name <NAME> --value <VALUE> [--ttl] [--priority] [--weight] [--port]
 dns-zone record update <ZONE_ID> <RECORD_ID> [--type] [--name] [--value] [--ttl] ...
 dns-zone record delete <ZONE_ID> <RECORD_ID>
-dns-zone record scan <ZONE_ID>
-dns-zone record scan-results <ZONE_ID>
+dns-zone record scan [--zone-id <ID>] [--domain <DOMAIN>]   # POST /dnszone/records/scan — accepts either zone ID or domain
+dns-zone record scan-results <ZONE_ID>                      # GET /dnszone/{zoneId}/records/scan
 dns-zone certificate issue <ZONE_ID> [--domain]
 ```
 
@@ -329,10 +347,10 @@ video-library reset-api-key <ID>
 video-library reset-read-only-api-key <ID>
 video-library watermark add <ID> --file <PATH>
 video-library watermark delete <ID>
-video-library live-thumbnail add <ID> --file <PATH>
-video-library live-thumbnail delete <ID>
-video-library live-watermark add <ID> --file <PATH>
-video-library live-watermark delete <ID>
+video-library live-thumbnail add <ID> --file <PATH>    # PUT /videolibrary/{id}/live/thumbnail
+video-library live-thumbnail delete <ID>               # DELETE /videolibrary/{id}/live/thumbnail
+video-library live-watermark add <ID> --file <PATH>    # PUT /videolibrary/{id}/live/watermark
+video-library live-watermark delete <ID>               # DELETE /videolibrary/{id}/live/watermark
 video-library drm-statistics <ID> [--date-from] [--date-to]
 video-library transcribing-statistics <ID> [--date-from] [--date-to]
 ```
@@ -362,7 +380,13 @@ pub enum DnsRecordAction {
     Add { zone_id: i64, ... },
     Update { zone_id: i64, record_id: i64, ... },
     Delete { zone_id: i64, record_id: i64 },
-    Scan { zone_id: i64 },
+    /// Requires exactly one of --zone-id or --domain
+    Scan {
+        #[arg(long, group = "target")]
+        zone_id: Option<i64>,
+        #[arg(long, group = "target")]
+        domain: Option<String>,
+    },
     ScanResults { zone_id: i64 },
 }
 ```
@@ -373,10 +397,10 @@ Each command handler function: `pub fn run(action, &Client, OutputMode) -> Resul
 
 Same module as the other tools:
 
-- `OutputMode::Table` (default): markdown tables via `tabled`, key-value pairs for `get`, confirmation messages for mutations
+- `OutputMode::Table` (default): markdown tables via `tabled` with `Style::markdown()`, key-value pairs for `get`, confirmation messages for mutations
 - `OutputMode::Json` (`--json`): `serde_json::to_string_pretty` of the full API response
 - `print_table(&[T])`, `print_json(&Value)`, `print_kv(&[(&str, String)])`, `print_confirm(&str)`
-- `print_pagination(current_page, total_items, has_more_items)` — derived from `PaginatedList` fields (response body, not headers)
+- `print_pagination(current_page, total_items, has_more_items)` — derived from `PaginatedList` fields (response body, not headers). Output format: `"Page {current_page} ({total_items} total items){suffix}"` where suffix is `", more available"` if `has_more_items` is true
 
 ## Testing
 
@@ -430,6 +454,7 @@ Trigger on push to `main`. Steps: checkout, Node 22, Rust toolchain, npm install
 - `reqwest = { version = "0.12", features = ["blocking", "json", "gzip"] }`
 - `serde = { version = "1", features = ["derive"] }`
 - `serde_json = "1"`
+- `serde_repr = "0.1"` — integer enum serialization
 - `tabled = "0.17"`
 - `toml = "0.8"`
 - dev: `serial_test = "3"`
