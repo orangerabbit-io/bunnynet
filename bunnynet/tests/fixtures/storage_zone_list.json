@@ -1,0 +1,25 @@
+{
+  "Items": [
+    {
+      "Id": 100,
+      "Name": "zone-alpha",
+      "Region": "DE",
+      "StorageUsed": 1048576,
+      "FilesStored": 42,
+      "StorageHostname": "storage.bunnycdn.com",
+      "ZoneTier": 0
+    },
+    {
+      "Id": 200,
+      "Name": "zone-beta",
+      "Region": "NY",
+      "StorageUsed": 2097152,
+      "FilesStored": 100,
+      "StorageHostname": "ny.storage.bunnycdn.com",
+      "ZoneTier": 1
+    }
+  ],
+  "CurrentPage": 1,
+  "TotalItems": 2,
+  "HasMoreItems": false
+}

@@ -1,0 +1,15 @@
+{
+    "TotalBandwidthUsed": 1234567890,
+    "TotalOriginTraffic": 987654321,
+    "AverageOriginResponseTime": 250,
+    "TotalRequestsServed": 5000000,
+    "CacheHitRate": 95.5,
+    "BandwidthUsedChart": {
+        "2024-01-01T00:00:00Z": 100.0,
+        "2024-01-02T00:00:00Z": 200.0
+    },
+    "GeoTrafficDistribution": {
+        "US": 50000,
+        "DE": 30000
+    }
+}

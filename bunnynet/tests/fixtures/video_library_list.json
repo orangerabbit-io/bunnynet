@@ -1,0 +1,34 @@
+{
+  "Items": [
+    {
+      "Id": 5001,
+      "Name": "my-videos",
+      "VideoCount": 42,
+      "TrafficUsage": 1073741824,
+      "StorageUsage": 536870912,
+      "ApiKey": "abc123-api-key-long",
+      "PullZoneId": 2001,
+      "StorageZoneId": 3001,
+      "EnableDRM": false,
+      "PlayerVersion": 2,
+      "EncodingTier": 0
+    },
+    {
+      "Id": 5002,
+      "Name": "live-streams",
+      "VideoCount": 10,
+      "TrafficUsage": 500000,
+      "StorageUsage": 250000,
+      "ApiKey": "def456-api-key-long",
+      "PullZoneId": 2002,
+      "StorageZoneId": 3002,
+      "EnableDRM": true,
+      "DrmVersion": 1,
+      "PlayerVersion": 2,
+      "EncodingTier": 1
+    }
+  ],
+  "CurrentPage": 1,
+  "TotalItems": 2,
+  "HasMoreItems": false
+}

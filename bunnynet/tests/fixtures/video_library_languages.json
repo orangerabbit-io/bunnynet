@@ -1,0 +1,6 @@
+[
+  {"ShortCode": "en", "Name": "English", "SupportedByTts": true},
+  {"ShortCode": "de", "Name": "German", "SupportedByTts": true},
+  {"ShortCode": "fr", "Name": "French", "SupportedByTts": true},
+  {"ShortCode": "ja", "Name": "Japanese", "SupportedByTts": false}
+]
