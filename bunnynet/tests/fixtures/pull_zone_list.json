@@ -1,0 +1,50 @@
+{
+  "Items": [
+    {
+      "Id": 1001,
+      "Name": "my-cdn",
+      "OriginUrl": "https://origin.example.com",
+      "Enabled": true,
+      "Suspended": false,
+      "Hostnames": [
+        {
+          "Id": 1,
+          "Value": "cdn.example.com",
+          "ForceSSL": true,
+          "IsSystemHostname": false,
+          "HasCertificate": true
+        }
+      ],
+      "StorageZoneId": 0,
+      "MonthlyBandwidthUsed": 536870912,
+      "MonthlyBandwidthLimit": 1073741824,
+      "OriginType": 0,
+      "Type": 0,
+      "EnableGeoZoneUS": true,
+      "EnableGeoZoneEU": true,
+      "EnableGeoZoneASIA": false,
+      "EnableGeoZoneSA": false,
+      "EnableGeoZoneAF": false,
+      "ZoneSecurityEnabled": false,
+      "EnableLogging": true,
+      "VerifyOriginSSL": true
+    },
+    {
+      "Id": 1002,
+      "Name": "static-assets",
+      "OriginUrl": "https://storage.example.com",
+      "Enabled": true,
+      "Suspended": false,
+      "Hostnames": [],
+      "StorageZoneId": 50,
+      "MonthlyBandwidthUsed": 1024,
+      "OriginType": 2,
+      "Type": 1,
+      "EnableGeoZoneUS": true,
+      "EnableGeoZoneEU": true
+    }
+  ],
+  "CurrentPage": 1,
+  "TotalItems": 2,
+  "HasMoreItems": false
+}

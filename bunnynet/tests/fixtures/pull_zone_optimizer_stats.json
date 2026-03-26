@@ -1,0 +1,10 @@
+{
+  "RequestsOptimizedChart": {"2024-01-01T00:00:00": 100, "2024-01-02T00:00:00": 200},
+  "AverageCompressionChart": {"2024-01-01T00:00:00": 50},
+  "TrafficSavedChart": {"2024-01-01T00:00:00": 1024},
+  "AverageProcessingTimeChart": {"2024-01-01T00:00:00": 15},
+  "TotalRequestsOptimized": 300.0,
+  "TotalTrafficSaved": 2048.0,
+  "AverageProcessingTime": 12.5,
+  "AverageCompressionRatio": 0.65
+}

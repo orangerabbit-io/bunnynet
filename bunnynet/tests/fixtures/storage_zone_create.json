@@ -1,0 +1,12 @@
+{
+  "Id": 300,
+  "Name": "new-zone",
+  "Region": "LA",
+  "StorageUsed": 0,
+  "FilesStored": 0,
+  "StorageHostname": "la.storage.bunnycdn.com",
+  "ZoneTier": 0,
+  "ReplicationRegions": [],
+  "Deleted": false,
+  "StorageZoneType": 0
+}

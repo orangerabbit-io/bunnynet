@@ -1,0 +1,3 @@
+[workspace]
+members = ["bunnynet-lib", "bunnynet"]
+resolver = "2"

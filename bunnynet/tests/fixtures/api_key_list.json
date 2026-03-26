@@ -1,0 +1,17 @@
+{
+  "Items": [
+    {
+      "Id": 1,
+      "Key": "key-abc-123",
+      "Roles": ["admin"]
+    },
+    {
+      "Id": 2,
+      "Key": "key-def-456",
+      "Roles": ["billing", "dns"]
+    }
+  ],
+  "CurrentPage": 1,
+  "TotalItems": 2,
+  "HasMoreItems": false
+}

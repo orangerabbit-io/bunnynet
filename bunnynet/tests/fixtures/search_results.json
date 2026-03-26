@@ -1,0 +1,18 @@
+{
+  "Query": "example",
+  "Total": 2,
+  "From": 0,
+  "Size": 10,
+  "SearchResults": [
+    {
+      "Type": "cdn",
+      "Id": 123,
+      "Name": "my-zone"
+    },
+    {
+      "Type": "dns",
+      "Id": 456,
+      "Name": "example.com"
+    }
+  ]
+}

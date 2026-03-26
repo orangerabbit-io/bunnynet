@@ -1,0 +1,12 @@
+{
+  "Id": 2001,
+  "Type": 0,
+  "Ttl": 300,
+  "Value": "1.2.3.4",
+  "Name": "www",
+  "Weight": 0,
+  "Priority": 0,
+  "Port": 0,
+  "Disabled": false,
+  "Comment": "test A record"
+}

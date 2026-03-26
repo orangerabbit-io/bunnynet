@@ -1,0 +1,20 @@
+{
+  "Id": 100,
+  "Name": "zone-alpha",
+  "Region": "DE",
+  "StorageUsed": 1048576,
+  "FilesStored": 42,
+  "StorageHostname": "storage.bunnycdn.com",
+  "ZoneTier": 0,
+  "ReplicationRegions": ["NY", "LA"],
+  "Deleted": false,
+  "Password": "secret",
+  "ReadOnlyPassword": "ro-secret",
+  "Rewrite404To200": false,
+  "Custom404FilePath": "/404.html",
+  "ReplicationChangeInProgress": false,
+  "Discount": 0,
+  "PriceOverride": 0.01,
+  "StorageZoneType": 0,
+  "PullZones": []
+}

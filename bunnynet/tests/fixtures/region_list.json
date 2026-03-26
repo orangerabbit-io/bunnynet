@@ -1,0 +1,24 @@
+[
+  {
+    "Id": 1,
+    "Name": "Europe (London)",
+    "PricePerGigabyte": 0.01,
+    "RegionCode": "UK",
+    "ContinentCode": "EU",
+    "CountryCode": "GB",
+    "Latitude": 51.5074,
+    "Longitude": -0.1278,
+    "AllowLatencyRouting": true
+  },
+  {
+    "Id": 2,
+    "Name": "US (New York)",
+    "PricePerGigabyte": 0.01,
+    "RegionCode": "NY",
+    "ContinentCode": "NA",
+    "CountryCode": "US",
+    "Latitude": 40.7128,
+    "Longitude": -74.006,
+    "AllowLatencyRouting": true
+  }
+]

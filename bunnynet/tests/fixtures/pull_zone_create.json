@@ -1,0 +1,21 @@
+{
+  "Id": 2001,
+  "Name": "new-cdn",
+  "OriginUrl": "https://new-origin.example.com",
+  "Enabled": true,
+  "Suspended": false,
+  "Hostnames": [],
+  "StorageZoneId": 0,
+  "MonthlyBandwidthUsed": 0,
+  "OriginType": 0,
+  "Type": 0,
+  "EnableGeoZoneUS": true,
+  "EnableGeoZoneEU": true,
+  "EnableGeoZoneASIA": false,
+  "EnableGeoZoneSA": false,
+  "EnableGeoZoneAF": false,
+  "ZoneSecurityEnabled": false,
+  "EnableLogging": true,
+  "VerifyOriginSSL": true,
+  "CacheVersion": 1
+}

@@ -1,0 +1,9 @@
+{
+    "Balance": 42.50,
+    "ThisMonthCharges": 12.75,
+    "BillingEnabled": true,
+    "MonthlyBandwidthUsed": 9876543,
+    "MonthlyChargesStorage": 1.25,
+    "MonthlyChargesDNS": 0.50,
+    "BillingHistoryChart": {"2024-01": 100}
+}

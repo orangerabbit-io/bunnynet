@@ -1,0 +1,12 @@
+[
+    {
+        "Id": 456,
+        "Amount": 99.99,
+        "DateGenerated": "2024-01-15T00:00:00Z",
+        "DateDue": "2024-02-15T00:00:00Z",
+        "Description": "Monthly invoice",
+        "Paid": false,
+        "TaxRate": 0.20,
+        "TaxedAmount": 119.99
+    }
+]

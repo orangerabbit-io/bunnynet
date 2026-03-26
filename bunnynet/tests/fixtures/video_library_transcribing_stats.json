@@ -1,0 +1,7 @@
+{
+  "TotalTranscriptionSeconds": 36000,
+  "TranscriptionSecondsChart": {
+    "2024-01-01T00:00:00Z": 5000.0,
+    "2024-01-02T00:00:00Z": 7000.0
+  }
+}

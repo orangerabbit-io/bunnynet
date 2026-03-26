@@ -1,0 +1,6 @@
+{
+  "RequestsRetriedChart": {"2024-01-01T00:00:00": 25, "2024-01-02T00:00:00": 30},
+  "RequestsSavedChart": {"2024-01-01T00:00:00": 75, "2024-01-02T00:00:00": 80},
+  "TotalRequestsRetried": 55.0,
+  "TotalRequestsSaved": 155.0
+}
