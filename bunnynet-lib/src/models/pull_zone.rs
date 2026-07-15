@@ -97,6 +97,7 @@ pub enum CertificateProvisionType {
     Http01 = 1,
     Dns01 = 2,
     Custom = 3,
+    Managed = 4,
 }
 
 /// Private key type: Ecdsa (0) or Rsa (1)
@@ -146,6 +147,7 @@ pub enum EdgeRuleActionType {
     DisableShieldRateLimiting = 32,
     EnableRequestCoalescing = 33,
     DisableRequestCoalescing = 34,
+    StripCookiesClientToOrigin = 37,
 }
 
 /// Trigger types for edge rules
@@ -1179,6 +1181,17 @@ mod tests {
         assert_eq!(cache, ExecutionPhase::Cache);
         let lb: ExecutionPhase = serde_json::from_str("1").unwrap();
         assert_eq!(lb, ExecutionPhase::LoadBalancer);
+
+        // CertificateProvisionType
+        let managed: CertificateProvisionType = serde_json::from_str("4").unwrap();
+        assert_eq!(managed, CertificateProvisionType::Managed);
+
+        // EdgeRuleActionType
+        let strip_cookies: EdgeRuleActionType = serde_json::from_str("37").unwrap();
+        assert_eq!(
+            strip_cookies,
+            EdgeRuleActionType::StripCookiesClientToOrigin
+        );
     }
 
     #[test]
